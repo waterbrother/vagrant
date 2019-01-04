@@ -13,22 +13,28 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "julian/vagrant-arch"
+  config.vm.provision "shell", inline: "pacman -S python --noconfirm"
+
+  config.vm.synced_folder "./", "/vagrant", owner: "vagrant", mount_options: ["dmode=775,fmode=600"]
 
   config.vm.define "docker" do |docker|
 	  docker.vm.hostname = "docker"
 	  docker.vm.network "private_network", ip: "192.168.0.21"
+
   end
 
   config.vm.define "ansible" do |ansible|
 	  ansible.vm.hostname = "ansible"
 	  ansible.vm.network "private_network", ip: "192.168.0.11"
 
+	  #ansible.vm.provision "file", source: "ansible.cfg", destination: "/etc/ansible/ansible.cfg"
+
 	  ansible.vm.provision "ansible_local" do |a|
 		  a.playbook       = "playbooks/docker.yaml"
 		  #a.verbose        = true
 		  a.install        = true
 		  a.limit          = "all"
-		  a.inventory_path = "hosts"
+		  a.inventory_path = "/vagrant/hosts"
 	  end
   end
 
