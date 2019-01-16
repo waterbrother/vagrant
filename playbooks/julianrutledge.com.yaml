@@ -1,0 +1,11 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: docker
+  gather_facts: true
+  become: true
+  roles:
+  - role: julianrutledge.com
+  tasks:
+    - debug:
+        msg: Done!  
+...

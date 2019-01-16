@@ -13,14 +13,15 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "julian/vagrant-arch"
-  config.vm.provision "shell", inline: "pacman -S python git --noconfirm"
+  config.vm.provision "shell", inline: "pacman -Syy python python-pip git --noconfirm --needed"
 
   config.vm.synced_folder "./", "/vagrant", owner: "vagrant", mount_options: ["dmode=775,fmode=600"]
 
   config.vm.define "docker" do |docker|
 	  docker.vm.hostname = "docker"
 	  docker.vm.network "private_network", ip: "192.168.0.21"
-
+	  docker.vm.provision "shell", inline: "pacman -Syy docker polkit --noconfirm --needed"
+	  docker.vm.provision "shell", inline: "pip install docker"
   end
 
   config.vm.define "ansible" do |ansible|
@@ -34,7 +35,7 @@ Vagrant.configure("2") do |config|
 		  #a.verbose        = true
 		  a.install        = true
 		  a.limit          = "all"
-		  a.inventory_path = "/vagrant/hosts"
+		  a.inventory_path = "/vagrant/inventory/hosts"
 	  end
   end
 

@@ -1,0 +1,11 @@
+FROM greyltc/archlinux
+
+RUN pacman -S crystal shards clang base-devel --noconfirm --needed
+
+ADD . /julianrutledge.com
+
+WORKDIR /julianrutledge.com
+
+RUN shards && crystal build src/julianrutledge.com-crystal.cr --release
+
+CMD [ "julianrutledge.com-crystal" ]

@@ -1,0 +1,44 @@
+---
+- name: ensure project directory exists
+  file:
+    path: /git/julianrutledge.com
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: 0755
+
+- name: clone source code to project directory
+  git:
+    repo: https://{{ git_user }}:{{ git_password }}@github.com/waterbrother/julianrutledge.com-crystal.git
+    dest: /git/julianrutledge.com
+    force: yes
+
+- name: write dockerfile to project directory
+  template: 
+    src: "dockerfile.j2"
+    dest: "/git/julianrutledge.com/dockerfile"
+    owner: vagrant
+    group: vagrant
+
+- name: build docker image
+  # https://docs.ansible.com/ansible/latest/modules/docker_image_module.html
+  docker_image:
+     path: /git/julianrutledge.com
+     name: 'jrutledge/julianrutledge.com'    
+     buildargs:
+       # https://docs.docker.com/engine/reference/commandline/build/
+       log_volume: /var/log/julianrutledge.com
+       listen_port: 3000
+
+- name: start container
+  # https://docs.ansible.com/ansible/latest/modules/docker_container_module.html
+  docker_container:
+    docker_host: unix://var/run/docker.sock
+    name: julianrutledge.com
+    image:  'jrutledge/julianrutledge.com'
+    state: started
+    restart_policy: unless-stopped
+    # https://docs.docker.com/config/containers/start-containers-automatically/
+    ports: 
+      - '80:3000'
+...
